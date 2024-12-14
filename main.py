@@ -1,18 +1,19 @@
-import json
 import feedparser
+from newspaper import Article
 
-with open("feeds.json", "r") as file:
-    raw_data = json.load(file)
+URL = 'https://mada38.appspot.com/www.madamasr.com/feed'
 
-urls = set()
-for feed in raw_data['feeds']:
-    urls.add(feed['url'])
+feed = feedparser.parse(URL)
 
-for url in urls:
-    feed = feedparser.parse(url)
-    for entry in feed.entries:
-        if 'content' in entry:
-            fulltext = entry.content[0].value
-        else:
-            fulltext = entry.description
-        print(fulltext)
+urls = [entry.link for entry in feed.entries if 'link' in entry]
+
+article = Article(urls[0])
+
+article.download()
+
+article.parse()
+
+print("Title:", article.title)
+print("Authors:", ', '.join(article.authors))
+print("Published Date:", article.publish_date)
+print("Content:", article.text)
