@@ -15,7 +15,7 @@ from dataclasses import dataclass, asdict
 from typing import List, Optional
 
 import feedparser
-import newspaper
+
 
 @dataclass
 class FeedConfig:
@@ -28,14 +28,15 @@ class FeedConfig:
 
 @dataclass
 class Article:
-    """Represents a single article from an RSS feed."""
+    """
+    Represents a single article from an RSS feed.
+    The reason for having the two date attributes below rather than a single attribute is that 
+    different feeds might have different data formats, which is annoying to sort through.
+    published is also usually human readable, while publishedparsed is for the script to deal with.
+    """
     title: str
     link: str
-    summary: str
-    body: str
     published: str
-    source_name: str
-    category: str
     published_parsed: Optional[datetime] = None
 
 
@@ -151,12 +152,7 @@ class FeedHandler:
                     article = Article(
                         title=entry.get("title", "No Title"),
                         link=entry.get("link", ""),
-                        summary=entry.get("summary", "").strip(),
-                        body=
                         published=entry.get("published", "No Date"),
-                        source_name=feed_config.name or parsed_feed.feed.get(
-                            'title', 'Unknown Source'),
-                        category=feed_config.category or 'Uncategorized',
                         published_parsed=published_parsed
                     )
                     articles.append(article)
@@ -197,15 +193,3 @@ class FeedHandler:
 
         self.logger.info("Collected total of %d articles", len(all_articles))
         return all_articles
-
-    def get_articles_by_category(self, category: str) -> List[Article]:
-        """Filter articles by category.
-
-        Args:
-            category: Category to filter by.
-
-        Returns:
-            List of articles in the specified category.
-        """
-        articles = self.collect_articles()
-        return [article for article in articles if article.category == category]
