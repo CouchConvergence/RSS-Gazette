@@ -186,38 +186,6 @@ class EpistleGUI:
         self.target_email_entry.insert(
             0, self.settings.get("target_email", ""))
 
-        # Time to Send Emails
-        tb.Label(settings_tab, text="Time to Send Emails (HH:MM):").grid(
-            row=5, column=0, sticky="w", padx=10, pady=5)
-
-        # Time Picker Frame
-        time_picker_frame = tb.Frame(settings_tab)
-        time_picker_frame.grid(row=5, column=1, padx=10, pady=5, sticky="w")
-
-        # Hour Spinbox
-        self.hour_var = tk.StringVar(value=self.settings.get("hour", "00"))
-        hour_spinbox = tb.Spinbox(time_picker_frame, from_=0, to=23,
-                                  wrap=True, format="%02.0f", textvariable=self.hour_var, width=3)
-        hour_spinbox.grid(row=0, column=0, padx=(0, 2), pady=0, sticky="e")
-
-        # Colon Label
-        colon_label = tb.Label(time_picker_frame, text=":")
-        colon_label.grid(row=0, column=1, padx=2, pady=0)
-
-        # Minute Spinbox
-        self.minute_var = tk.StringVar(value=self.settings.get("minute", "00"))
-        minute_spinbox = tb.Spinbox(time_picker_frame, from_=0, to=59,
-                                    wrap=True, format="%02.0f",
-                                    textvariable=self.minute_var, width=3)
-        minute_spinbox.grid(row=0, column=2, padx=(2, 0), pady=0, sticky="w")
-
-        # Days Between Emails
-        tb.Label(settings_tab, text="Days Between Emails:").grid(
-            row=6, column=0, sticky="w", padx=10, pady=5)
-        self.days_entry = tb.Entry(settings_tab, width=40)
-        self.days_entry.grid(row=6, column=1, padx=10, pady=5, sticky="ew")
-        self.days_entry.insert(0, self.settings.get("days_between_emails", ""))
-
         # Article Type Dropdown
         tb.Label(settings_tab, text="Article Type:").grid(
             row=7, column=0, sticky="w", padx=10, pady=5)
@@ -413,29 +381,18 @@ class EpistleGUI:
         smtp_server = self.smtp_server_entry.get()
         smtp_port = self.smtp_port_entry.get()
         target_email = self.target_email_entry.get()
-        hour = self.hour_var.get()
-        minute = self.minute_var.get()
-        time_to_send = f"{hour}:{minute}"
-        days_between_emails = self.days_entry.get()
         article_type = self.article_type_var.get()
         theme = self.theme_var.get()
 
         # Validate inputs
-        if (not smtp_username or not smtp_password or not smtp_server or not smtp_port
-            or not target_email or not time_to_send or not days_between_emails):
+        if (not smtp_username
+            or not smtp_password
+            or not smtp_server
+            or not smtp_port
+            or not target_email):
             messagebox.showerror("Input Error", "All fields must be filled!")
             self.logger.error(
                 "Attempted to save settings with missing fields.")
-            return
-
-        try:
-            # Convert days to integer
-            days_between_emails = int(days_between_emails)
-        except ValueError:
-            messagebox.showerror(
-                "Input Error", "Days between emails must be an integer!")
-            self.logger.error(
-                "Attempted to save settings with non-integer days between emails.")
             return
 
         try:
@@ -455,9 +412,6 @@ class EpistleGUI:
             "smtp_server": smtp_server,
             "smtp_port": smtp_port,
             "target_email": target_email,
-            "hour": hour,
-            "minute": minute,
-            "days_between_emails": days_between_emails,
             "article_type": article_type,
             "theme": theme
         }
