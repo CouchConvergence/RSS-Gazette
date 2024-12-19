@@ -136,42 +136,63 @@ class EpistleGUI:
         settings_tab.rowconfigure(4, weight=1)
         settings_tab.rowconfigure(5, weight=1)
         settings_tab.rowconfigure(6, weight=1)
-        settings_tab.rowconfigure(7, weight=1)  # New row for article type
+        settings_tab.rowconfigure(7, weight=1)
+        settings_tab.rowconfigure(8, weight=1)
         settings_tab.columnconfigure(0, weight=1)
         settings_tab.columnconfigure(1, weight=1)
 
-        # SMTP2Go Credentials
-        tb.Label(settings_tab, text="SMTP2Go API Key:").grid(
+        # SMTP Username/Email
+        tb.Label(settings_tab, text="SMTP Username/Email:").grid(
             row=0, column=0, sticky="w", padx=10, pady=5)
-        self.smtp_api_key_entry = tb.Entry(settings_tab, width=40)
-        self.smtp_api_key_entry.grid(
+        self.smtp_username_entry = tb.Entry(settings_tab, width=40)
+        self.smtp_username_entry.grid(
             row=0, column=1, padx=10, pady=5, sticky="ew")
-        self.smtp_api_key_entry.insert(
-            0, self.settings.get("smtp_api_key", ""))
+        self.smtp_username_entry.insert(
+            0, self.settings.get("smtp_username", ""))
 
-        tb.Label(settings_tab, text="SMTP2Go Secret:").grid(
+        # SMTP Password
+        tb.Label(settings_tab, text="SMTP Password:").grid(
             row=1, column=0, sticky="w", padx=10, pady=5)
-        self.smtp_secret_entry = tb.Entry(settings_tab, width=40)
-        self.smtp_secret_entry.grid(
+        self.smtp_password_entry = tb.Entry(settings_tab, width=40, show="*")
+        self.smtp_password_entry.grid(
             row=1, column=1, padx=10, pady=5, sticky="ew")
-        self.smtp_secret_entry.insert(0, self.settings.get("smtp_secret", ""))
+        self.smtp_password_entry.insert(
+            0, self.settings.get("smtp_password", ""))
+
+        # SMTP Server
+        tb.Label(settings_tab, text="SMTP Server:").grid(
+            row=2, column=0, sticky="w", padx=10, pady=5)
+        self.smtp_server_entry = tb.Entry(settings_tab, width=40)
+        self.smtp_server_entry.grid(
+            row=2, column=1, padx=10, pady=5, sticky="ew")
+        self.smtp_server_entry.insert(
+            0, self.settings.get("smtp_server", ""))
+
+        # SMTP Port
+        tb.Label(settings_tab, text="SMTP Port:").grid(
+            row=3, column=0, sticky="w", padx=10, pady=5)
+        self.smtp_port_entry = tb.Entry(settings_tab, width=40)
+        self.smtp_port_entry.grid(
+            row=3, column=1, padx=10, pady=5, sticky="ew")
+        self.smtp_port_entry.insert(
+            0, self.settings.get("smtp_port", ""))
 
         # Target Email
         tb.Label(settings_tab, text="Target Email:").grid(
-            row=2, column=0, sticky="w", padx=10, pady=5)
+            row=4, column=0, sticky="w", padx=10, pady=5)
         self.target_email_entry = tb.Entry(settings_tab, width=40)
         self.target_email_entry.grid(
-            row=2, column=1, padx=10, pady=5, sticky="ew")
+            row=4, column=1, padx=10, pady=5, sticky="ew")
         self.target_email_entry.insert(
             0, self.settings.get("target_email", ""))
 
         # Time to Send Emails
         tb.Label(settings_tab, text="Time to Send Emails (HH:MM):").grid(
-            row=3, column=0, sticky="w", padx=10, pady=5)
+            row=5, column=0, sticky="w", padx=10, pady=5)
 
         # Time Picker Frame
         time_picker_frame = tb.Frame(settings_tab)
-        time_picker_frame.grid(row=3, column=1, padx=10, pady=5, sticky="w")
+        time_picker_frame.grid(row=5, column=1, padx=10, pady=5, sticky="w")
 
         # Hour Spinbox
         self.hour_var = tk.StringVar(value=self.settings.get("hour", "00"))
@@ -192,38 +213,38 @@ class EpistleGUI:
 
         # Days Between Emails
         tb.Label(settings_tab, text="Days Between Emails:").grid(
-            row=4, column=0, sticky="w", padx=10, pady=5)
+            row=6, column=0, sticky="w", padx=10, pady=5)
         self.days_entry = tb.Entry(settings_tab, width=40)
-        self.days_entry.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
+        self.days_entry.grid(row=6, column=1, padx=10, pady=5, sticky="ew")
         self.days_entry.insert(0, self.settings.get("days_between_emails", ""))
 
         # Article Type Dropdown
         tb.Label(settings_tab, text="Article Type:").grid(
-            row=5, column=0, sticky="w", padx=10, pady=5)
+            row=7, column=0, sticky="w", padx=10, pady=5)
         self.article_type_var = tk.StringVar(value=self.settings.get(
             "article_type", "Summary"))  # Default to Summary
         self.article_type_dropdown = tb.Combobox(settings_tab, textvariable=self.article_type_var,
                                                 values=[
-                                                "Full", "Summary"], width=37, state="readonly")
+                                                    "Full", "Summary"], width=37, state="readonly")
         self.article_type_dropdown.grid(
-            row=5, column=1, padx=10, pady=5, sticky="ew")
+            row=7, column=1, padx=10, pady=5, sticky="ew")
 
         # Theme Selection
         tb.Label(settings_tab, text="Select Theme:").grid(
-            row=6, column=0, sticky="w", padx=10, pady=5)
+            row=8, column=0, sticky="w", padx=10, pady=5)
         self.theme_var = tk.StringVar(
             value=self.settings.get("theme", "darkly"))  # Default theme
         self.theme_dropdown = tb.Combobox(
             settings_tab, textvariable=self.theme_var,
             values=self.get_available_themes(), width=37, state="readonly")
-        self.theme_dropdown.grid(row=6, column=1, padx=10, pady=5, sticky="ew")
+        self.theme_dropdown.grid(row=8, column=1, padx=10, pady=5, sticky="ew")
         self.theme_dropdown.bind("<<ComboboxSelected>>", self.change_theme)
 
         # Save Settings Button
         self.save_settings_btn = tb.Button(
             settings_tab, text="Save Settings", command=self.save_settings, width=15)
         self.save_settings_btn.grid(
-            row=7, column=0, columnspan=2, pady=20, sticky="ew")
+            row=9, column=0, columnspan=2, pady=20, sticky="ew")
 
     def ensure_configs_directory_exists(self) -> None:
         """Ensure the configs directory exists."""
@@ -310,7 +331,6 @@ class EpistleGUI:
         self.logger.info("Deleted feed with URL: %s", feed_url)
         self.refresh_feed_list()
 
-
     def generate_epub(self) -> None:
         """Generate the EPUB file."""
         output_file = filedialog.asksaveasfilename(
@@ -340,7 +360,6 @@ class EpistleGUI:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to generate EPUB: {e}")
             self.logger.error("Failed to generate EPUB: %s", e)
-
 
     def refresh_feed_list(self) -> None:
         """Refresh the feed list display."""
@@ -389,8 +408,10 @@ class EpistleGUI:
 
     def save_settings(self) -> None:
         """Save the settings to a JSON file."""
-        smtp_api_key = self.smtp_api_key_entry.get()
-        smtp_secret = self.smtp_secret_entry.get()
+        smtp_username = self.smtp_username_entry.get()
+        smtp_password = self.smtp_password_entry.get()
+        smtp_server = self.smtp_server_entry.get()
+        smtp_port = self.smtp_port_entry.get()
         target_email = self.target_email_entry.get()
         hour = self.hour_var.get()
         minute = self.minute_var.get()
@@ -400,9 +421,8 @@ class EpistleGUI:
         theme = self.theme_var.get()
 
         # Validate inputs
-        if (not smtp_api_key or not smtp_secret
-            or not target_email or not time_to_send
-            or not days_between_emails):
+        if (not smtp_username or not smtp_password or not smtp_server or not smtp_port
+            or not target_email or not time_to_send or not days_between_emails):
             messagebox.showerror("Input Error", "All fields must be filled!")
             self.logger.error(
                 "Attempted to save settings with missing fields.")
@@ -418,10 +438,22 @@ class EpistleGUI:
                 "Attempted to save settings with non-integer days between emails.")
             return
 
+        try:
+            # Convert port to integer
+            smtp_port = int(smtp_port)
+        except ValueError:
+            messagebox.showerror(
+                "Input Error", "SMTP port must be an integer!")
+            self.logger.error(
+                "Attempted to save settings with non-integer SMTP port.")
+            return
+
         # Create settings dictionary
         settings = {
-            "smtp_api_key": smtp_api_key,
-            "smtp_secret": smtp_secret,
+            "smtp_username": smtp_username,
+            "smtp_password": smtp_password,
+            "smtp_server": smtp_server,
+            "smtp_port": smtp_port,
             "target_email": target_email,
             "hour": hour,
             "minute": minute,
