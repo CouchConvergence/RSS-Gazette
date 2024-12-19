@@ -1,6 +1,6 @@
-# RSS Gazette
+# Epistle
 
-RSS Gazette is a Python-based application that allows users to collect articles from various RSS feeds, compile them into a stylish EPUB "newspaper," and send it directly to their Kindle or any e-reader via email. The application supports user authentication with Gmail, Outlook, or other email providers, enabling seamless integration and automated delivery.
+Epistle is a Python-based application that allows users to collect articles from various RSS feeds, compile them into a stylish EPUB "newspaper," and send it directly to their Kindle or any e-reader via email. The application supports user authentication with Gmail, Outlook, or other email providers, enabling seamless integration and automated delivery.
 
 ## Features
 - **RSS Feed Management**: Add multiple RSS feed links or files.
