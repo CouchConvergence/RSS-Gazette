@@ -1,28 +1,20 @@
 """
-This file handles the parsing of RSS feeds, manages feed configurations,
-and collects articles from various parsed feeds.
-
-It includes the following components:
-- FeedConfig: Defines the configuration for each feed.
-- Article: Represents a single article parsed from an RSS feed.
-- FeedHandler: Handles the management of multiple RSS feeds, including loading
-  configurations, parsing feeds, and collecting articles.
+Feed handler module.
 """
 import json
-import logging
-from datetime import datetime
 from dataclasses import dataclass, asdict
 from typing import List, Optional
 
 import feedparser
+from newspaper import Article as FullText
 
+from logger import _setup_logger
 
 @dataclass
 class FeedConfig:
     """Configuration for a single RSS feed."""
     url: str
     num_articles: int = 5
-    category: Optional[str] = None
     name: Optional[str] = None
 
 
@@ -32,13 +24,14 @@ class Article:
     Represents a single article from an RSS feed.
     The reason for having the two date attributes below rather than a single attribute is that 
     different feeds might have different data formats, which is annoying to sort through.
-    published is also usually human readable, while publishedparsed is for the script to deal with.
+    published is also usually human readable, while published_parsed is for the script to deal with.
     """
     title: str
     link: str
+    summary: str
     published: str
-    published_parsed: Optional[datetime] = None
-
+    author: Optional[str] = None
+    text: Optional[str] = None
 
 class FeedHandler:
     """Handles the parsing and management of multiple RSS feeds."""
@@ -51,22 +44,10 @@ class FeedHandler:
         """
         self.json_path = json_path
         self.feeds_data: List[FeedConfig] = []
-        self.logger = self._setup_logger()
+        self.logger = _setup_logger("FeedHandler")
+        self.logger.info("FeedHandler Initialised. ")
         self.load_feeds()
 
-    @staticmethod
-    def _setup_logger() -> logging.Logger:
-        """Set up logging configuration."""
-        logger = logging.getLogger('FeedHandler')
-        if not logger.handlers:
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-            )
-            handler.setFormatter(formatter)
-            logger.addHandler(handler)
-            logger.setLevel(logging.INFO)
-        return logger
 
     def load_feeds(self) -> None:
         """Load and validate RSS feed metadata from the JSON file."""
@@ -128,32 +109,56 @@ class FeedHandler:
         Returns:
             List of parsed articles.
         """
+        articles = []
+
         try:
             parsed_feed = feedparser.parse(feed_config.url)
 
+            # Check if we get a 200
             if hasattr(parsed_feed, 'status') and parsed_feed.status != 200:
                 self.logger.warning(
-                    "Feed %s returned status %d", feed_config.url, parsed_feed.status)
-                return []
+                    "Feed %s returned status %d. Possible issue with the feed URL.", 
+                    feed_config.url, parsed_feed.status)
+                return articles
 
+            # Check if feed format is funky
             if parsed_feed.bozo:
                 self.logger.warning(
-                    "Feed %s has invalid format: %s", feed_config.url, parsed_feed.bozo_exception)
-                return []
+                    "Feed %s has possible invalid format: %s. Bozo flag set.", 
+                    feed_config.url, parsed_feed.bozo_exception)
+                return articles
 
-            articles = []
             for entry in parsed_feed.entries[:feed_config.num_articles]:
                 try:
-                    published_parsed = None
-                    if 'published_parsed' in entry:
-                        published_parsed = datetime(
-                            *entry.published_parsed[:6])
+                    # Fetch publication date if possible
+                    published = entry.get("published", "No Date")
+
+                    # Fetch article author if possible
+                    author = entry.get("author", "Unknown Author")
+
+                    # Fetch full article text
+                    full_article = None
+                    text = None
+                    try:
+                        full_article = FullText(entry.link)
+                        full_article.download()
+                        body = full_article.parse()
+                        text = body.text
+
+                    # pylint: disable=broad-exception-caught
+                    except Exception as e:
+                        self.logger.warning(
+                            "Newspaper library Error parsing full article for URL %s: %s",
+                             entry.link, e)
+                        text = "Error parsing full article content."
 
                     article = Article(
-                        title=entry.get("title", "No Title"),
-                        link=entry.get("link", ""),
-                        published=entry.get("published", "No Date"),
-                        published_parsed=published_parsed
+                        title = entry.get("title", "No Title"),
+                        link = entry.get("link", ""),
+                        summary = entry.get("summary"),
+                        published = published,
+                        author = author,
+                        text = text
                     )
                     articles.append(article)
                 except AttributeError as e:
@@ -161,35 +166,11 @@ class FeedHandler:
                         "Error parsing entry in %s: %s", feed_config.url, e)
                     continue
 
-            self.logger.info("Successfully parsed %d articles from %s", len(
-                articles), feed_config.url)
+            self.logger.info("Parsed %d articles from feed %s", len(articles), feed_config.url)
+
             return articles
 
         # pylint: disable=broad-exception-caught
         except Exception as e:
             self.logger.error("Error parsing feed %s: %s", feed_config.url, e)
             return []
-
-    def collect_articles(self, sort_by_date: bool = True) -> List[Article]:
-        """Collect and optionally sort articles from all configured feeds.
-
-        Args:
-            sort_by_date: Whether to sort articles by publication date.
-
-        Returns:
-            List of articles from all feeds.
-        """
-        all_articles = []
-
-        for feed_config in self.feeds_data:
-            articles = self.parse_feed(feed_config)
-            all_articles.extend(articles)
-
-        if sort_by_date and all_articles:
-            all_articles.sort(
-                key=lambda x: x.published_parsed or datetime.min,
-                reverse=True
-            )
-
-        self.logger.info("Collected total of %d articles", len(all_articles))
-        return all_articles
