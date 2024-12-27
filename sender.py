@@ -27,7 +27,7 @@ def main():
     Raises:
         SystemExit: If any critical error occurs during execution.
     """
-    logger = _setup_logger("MainScript")
+    logger = _setup_logger("Sender")
     settings_path = "configs/settings.json"
     os.makedirs("configs", exist_ok=True)
 
