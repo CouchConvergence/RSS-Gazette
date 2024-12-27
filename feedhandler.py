@@ -152,62 +152,58 @@ class FeedHandler:
         Returns:
             List of parsed articles.
         """
+
         articles = []
 
-        try:
-            parsed_feed = feedparser.parse(feed_config.url)
-            # Check if we get a 200
-            if hasattr(parsed_feed, 'status') and parsed_feed.status != 200:
-                self.logger.warning(
-                    "Feed %s returned status %d. Possible issue with the feed URL.",
-                    feed_config.url, parsed_feed.status)
-                return articles
-            # Check if feed format is funky
-            if parsed_feed.bozo:
-                self.logger.warning(
-                    "Feed %s has possible invalid format: %s. Bozo flag set.",
-                    feed_config.url, parsed_feed.bozo_exception)
-                return articles
-
-            for entry in parsed_feed.entries[:feed_config.num_articles]:
-                try:
-                    # Fetch publication date if possible
-                    published = entry.get("published", "No Date")
-                    # Fetch article author if possible
-                    author = entry.get("author", "Unknown Author")
-                    # Fetch full article text
-                    text = None
-                    try:
-                        full_article = FullText(entry.link)
-                        full_article.download()
-                        body = full_article.parse()
-                        text = body.text
-                    # pylint: disable=broad-exception-caught
-                    except Exception as e:
-                        self.logger.warning(
-                            "Newspaper library Error parsing full article for URL %s: %s",
-                            entry.link, e)
-                        text = "Error parsing full article content."
-
-                    article = Article(
-                        title=entry.get("title", "No Title"),
-                        link=entry.get("link", ""),
-                        summary=entry.get("summary"),
-                        published=published,
-                        author=author,
-                        text=text
-                    )
-                    articles.append(article)
-                except AttributeError as e:
-                    self.logger.warning(
-                        "Error parsing entry in %s: %s", feed_config.url, e)
-                    continue
-
-            self.logger.info("Parsed %d articles from feed %s",
-                            len(articles), feed_config.url)
-
+        parsed_feed = feedparser.parse(feed_config.url)
+        # Check if we get a 200
+        if hasattr(parsed_feed, 'status') and parsed_feed.status != 200:
+            self.logger.warning(
+                "Feed %s returned status %d. Possible issue with the feed URL.",
+                feed_config.url, parsed_feed.status)
             return articles
-        # pylint: disable=broad-exception-caught
-        except Exception as e:
-            self.logger.error("Error parsing feed %s: %s", feed_config.url, e)
-            return []
+        # Check if feed format is funky
+        if parsed_feed.bozo:
+            self.logger.warning(
+                "Feed %s has possible invalid format: %s. Bozo flag set.",
+                feed_config.url, parsed_feed.bozo_exception)
+            return articles
+
+        for entry in parsed_feed.entries[:feed_config.num_articles]:
+            try:
+                # Fetch publication date if possible
+                published = entry.get("published", "No Date")
+                # Fetch article author if possible
+                author = entry.get("author", "Unknown Author")
+                # Fetch full article text
+                text = None
+                try:
+                    full_article = FullText(entry.link)
+                    full_article.download()
+                    body = full_article.parse()
+                    text = body.text
+                # pylint: disable=broad-exception-caught
+                except Exception as e:
+                    self.logger.warning(
+                        "Newspaper library Error parsing full article for URL %s: %s",
+                        entry.link, e)
+                    text = "Error parsing full article content."
+
+                article = Article(
+                    title=entry.get("title", "No Title"),
+                    link=entry.get("link", ""),
+                    summary=entry.get("summary"),
+                    published=published,
+                    author=author,
+                    text=text
+                )
+                articles.append(article)
+            except AttributeError as e:
+                self.logger.warning(
+                    "Error parsing entry in %s: %s", feed_config.url, e)
+                continue
+
+        self.logger.info("Parsed %d articles from feed %s",
+                        len(articles), feed_config.url)
+
+        return articles
