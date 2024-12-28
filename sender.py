@@ -20,12 +20,9 @@ def main():
     Generate an EPUB file from RSS feeds and send it via email.
 
     Steps:
-        1. Verify configuration files exist; if not, prompt the user to create them.
+        1. Verify configuration files exist; if not, prompt the user to create them via GUI.py.
         2. Use configuration settings to generate an EPUB newspaper.
         3. Email the generated EPUB file to the specified recipient.
-
-    Raises:
-        SystemExit: If any critical error occurs during execution.
     """
     logger = _setup_logger("Sender")
     settings_path = "configs/settings.json"

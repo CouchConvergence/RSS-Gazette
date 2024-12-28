@@ -1,5 +1,10 @@
 """
 GUI Module.
+
+Classes:
+    EpistleGUI: The main application class that creates and manages the GUI interface.
+    Yes, I am aware that the class size makes the linter complain. I am not very good at this.
+
 """
 import tkinter as tk
 from tkinter import messagebox, filedialog, ttk
@@ -18,7 +23,7 @@ from logger import _setup_logger
 class EpistleGUI:
     """The main class, here the magic gets drawn"""
 
-    def __init__(self, root):
+    def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("Epistle")
         self.root.geometry("800x540")
