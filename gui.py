@@ -2,7 +2,7 @@
 GUI Module.
 
 Classes:
-    EpistleGUI: The main application class that creates and manages the GUI interface.
+    GazetteGUI: The main application class that creates and manages the GUI interface.
     Yes, I am aware that the class size makes the linter complain. I am not very good at this.
 
 """
@@ -20,19 +20,19 @@ from generator import EpubGenerator
 from logger import _setup_logger
 
 
-class EpistleGUI:
+class GazetteGUI:
     """The main class, here the magic gets drawn"""
 
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.root.title("Epistle")
+        self.root.title("RSS-Gazette")
         self.root.geometry("800x540")
         self.handler = FeedHandler("configs/feeds.json")
         self.generator = EpubGenerator()
         self.settings_file = "configs/settings.json"
 
         # Create a logger for this class
-        self.logger = _setup_logger("EpistleGUI")
+        self.logger = _setup_logger("GazetteeGUI")
 
         # Ensure the configs directory exists
         self.ensure_configs_directory_exists()
@@ -437,5 +437,5 @@ class EpistleGUI:
 
 if __name__ == "__main__":
     start = tb.Window(themename="darkly")  # Default theme
-    app = EpistleGUI(start)
+    app = GazetteGUI(start)
     start.mainloop()
