@@ -4,7 +4,7 @@ A tool to automatically generate Epub newspapers from RSS feeds, and email them 
 ## Installation 
 Clone the repo, then inside the main folder execute:
 ```
-$ pip install -r requirements.text
+$ pip install -r requirements.txt
 ```
 ##  Configuration 
 First, you need to configure your feeds and settings, to do so, execute
